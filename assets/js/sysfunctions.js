@@ -208,7 +208,7 @@ function removeChrs(str, chs) {
     chs = chs.toString();
 
     for (let iChs = 0; iChs < chs.length; iChs++) {
-        str.replace(chs.charAt(iChs).toString(), '');
+        str = str.split(chs.charAt(iChs).toString()).join('');
     }
 
     return str;

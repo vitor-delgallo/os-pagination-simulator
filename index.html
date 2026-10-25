@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>O.S. - Pagination simulator</title>
+    <link rel="shortcut icon" href="assets/images/logos/favicon.ico" type="image/x-icon"/>
+
+    <!-- When a CSS or JS file changes, change its ?v= too, so browsers don't keep the old copy. -->
+    <link href="assets/plugins/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/nucleo-icons.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/blk-design-system.css" rel="stylesheet" type="text/css"/>
+    <link href="assets/css/formatacao.css?v=2026-10-25" rel="stylesheet" type="text/css"/>
+
+    <script src="assets/js/jquery-3.7.1.min.js" type="text/javascript"></script>
+    <script src="assets/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+</head>
+<!-- END HEAD -->
+
+<!-- BEGIN BODY -->
+<body class="index-page">
+<noscript>
+    <div class="alert alert-danger" role="alert">
+        This simulator runs in the browser: please enable JavaScript to use it.
+    </div>
+</noscript>
+<div class="wrapper">
+    <div class="sysloading">
+        <div class="center_content-vertical">
+            <img alt="" src="assets/images/loading.gif" />
+            <br/>
+            <div class="loading_text">
+                Loading...
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="modal fade" id="response_modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header justify-content-center">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <i class="tim-icons icon-simple-remove"></i>
+                        </button>
+                        <h4 class="title title-up">Result</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive" style="max-height: 400px">
+                            <table id="table-algorithm" class="table thead-dark tfoot-dark tbody-white tbody-info-dark">
+                                <thead></thead>
+                                <tbody></tbody>
+                                <tfoot></tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <img src="assets/images/path1.png" class="path" alt="" />
+
+        <!-- START CONTAINER -->
+        <div class="container">
+            <br />
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-danger" id="msg-error" role="alert" style="display: none;"></div>
+                    <div class="alert alert-success" id="msg-success" role="alert" style="display: none;"></div>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="center_content">
+                        <label>Project URL on GitHub: <a href="https://github.com/vitor-delgallo/os-pagination-simulator">https://github.com/vitor-delgallo/os-pagination-simulator</a></label>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="num-frames">O.S. - Number of Frames (Example: 10)</label>
+                        <input type="text" class="form-control" id="num-frames" name="num-frames" data-mask="number"
+                               data-dec_places="0" data-prefix="" data-suffix=""
+                               data-thous_sep="" data-dec_sep="," data-allow_neg="0" inputmode="numeric" autocomplete="off" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="pages">O.S. - Pages for Allocation (Numbers and Letters permitted)</label>
+                        <input type="text" class="form-control" id="pages" name="pages" data-mask="number_letters" autocomplete="off" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <label>Special Settings</label>
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="white_repeat" />
+                            <span class="form-check-sign"></span>
+                            Display white frames in page repetitions
+                        </label>
+                    </div>
+                </div>
+                <div class="d-lg-none">
+                    <br />
+                    <div class="my_line"></div>
+                    <br />
+                </div>
+                <div class="col-lg-6">
+                    <label>Choose the algorithm to be used</label>
+                    <div class="form-check form-check-radio">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="algorithm_type" id="fifo_type"
+                                   value="fifo" />
+                            <span class="form-check-sign"></span>
+                            FIFO
+                        </label>
+                    </div>
+                    <div class="form-check form-check-radio">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="algorithm_type" id="lru_type"
+                                   value="lru" />
+                            <span class="form-check-sign"></span>
+                            LRU
+                        </label>
+                    </div>
+                    <div class="form-check form-check-radio">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="algorithm_type" id="opt_type"
+                                   value="opt" />
+                            <span class="form-check-sign"></span>
+                            OPT
+                        </label>
+                    </div>
+                    <div class="form-check form-check-radio">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="algorithm_type" id="lifo_type"
+                                   value="lifo" />
+                            <span class="form-check-sign"></span>
+                            LIFO
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <br />
+            <div class="row">
+                <div class="col-12">
+                    <div class="center_content">
+                        <button type="button" id="run_algorithm" class="btn btn-success">
+                            Run Algorithm!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/views/system/index.js?v=2026-10-25" type="text/javascript"></script>
+
+<!-- CORE TEMPLATE JS - START -->
+<script src="assets/js/sysfunctions.js?v=2026-10-25" type="text/javascript"></script>
+<!-- CORE TEMPLATE JS - END -->
+</body>
+</html>

@@ -45,7 +45,8 @@ $('button#run_algorithm').on("click", function () {
 function runAlgorithm(table) {
     try {
         const frames = parseInt($('#num-frames').val());
-        const pages = $('#pages').val().split('');
+        // The mask already keeps only numbers and letters, but a value restored by the browser skips it
+        const pages = onlyNumbersLetters($('#pages').val()).split('');
         const algorithm = $("input[name='algorithm_type']:checked").val();
         const bolWhiteRepeat = $("input#white_repeat").is(':checked');
         let newCollumns = [], information = [];
@@ -62,7 +63,7 @@ function runAlgorithm(table) {
 
         $($(table).find('thead tr:first')).append("<th class='infodata'>Frames</th>");
         $.each(pages, function(key, value) {
-            $($(table).find('thead tr:first')).append("<th class='child-" + key + "'>" + value + "</th>");
+            $($(table).find('thead tr:first')).append($("<th></th>").addClass('child-' + key).text(value));
         });
 
         for (let i = 0; i < frames; i++) {
@@ -181,13 +182,15 @@ function runAlgorithm(table) {
             case "opt":
 				/**
 				 * The element "firsts" in the array will have a fixed size determined by the desired number of frames.
-				 * In the event of repetition, do not increment the array.
-				 * When a page replacement occurs, replace the element that will take the longest to be used again.
+				 * The array should always be in order; the first element to enter will be the first in the array.
+				 * In the event of repetition, do not increment the array nor change its position.
+				 * When a page replacement occurs, replace the element that will take the longest to be used again
+				 * (a page that is never used again comes first).
 				 * If there are two or more that could be replaced, choose the one that has been in memory the longest.
 				 *
 				 * @type {{
-				 * 		indexHasInformation: number, col: number, auxFirsts: {}, repeat: boolean, firsts: *[],
-				 * 		spliceAux: number, orders: *[], iSortAux: number, sortAuxFirst: *[]
+				 * 		indexHasInformation: number, col: number, firsts: *[], orders: *[], victim: number,
+				 * 		victimNextUse: number, repeat: boolean
 				 * }}
 				 */
 				information = {
@@ -195,10 +198,8 @@ function runAlgorithm(table) {
                     'col': 0,
                     'firsts': [],
                     'orders': [],
-                    'auxFirsts': {},
-                    'iSortAux': 0,
-                    'sortAuxFirst': [],
-                    'spliceAux': -1,
+                    'victim': -1,
+                    'victimNextUse': -1,
                     'repeat': false,
                 };
                 $($(table).find("thead tr:first th:not(.infodata)")).each(function (indexTh) {
@@ -208,48 +209,24 @@ function runAlgorithm(table) {
                             information['indexHasInformation']++;
                         }
 
-                        information['auxFirsts'] = {};
-                        $.each(information['firsts'], function (indexFirst, valueFirst) {
-                            information['auxFirsts'][valueFirst.toString()] = -1;
-                        });
-                        $.each(information['firsts'], function (indexFirst, valueFirst) {
-                            $.each(pages, function(indexPag, valuePag) {
-                                if(indexPag <= information['col']) return;
+                        if(information['firsts'].length >= frames) {
+                            // "firsts" is in order of arrival, so on a tie the earliest one found stays the victim
+                            information['victim'] = -1;
+                            information['victimNextUse'] = -1;
+                            $.each(information['firsts'], function (indexFirst, valueFirst) {
+                                let nextUse = pages.indexOf(valueFirst, information['col'] + 1);
+                                if(nextUse === -1) nextUse = Infinity;
 
-                                if(
-                                    valuePag.toString() === valueFirst.toString() &&
-                                    information['auxFirsts'][valuePag.toString()] === -1
-                                ){
-                                    information['auxFirsts'][valuePag.toString()] = indexPag;
-                                }
-                            });
-                        });
-
-                        information['iSortAux'] = 0;
-                        information['sortAuxFirst'] = [];
-                        $.each(information['auxFirsts'], function (indexFirst, valueFirst) {
-                            information['sortAuxFirst'][information['iSortAux']] = [indexFirst, parseInt(valueFirst)];
-                            information['iSortAux']++;
-                        });
-                        information['sortAuxFirst'].sort(function(a, b) {
-                            return b[1] - a[1];
-                        });
-                        $.each(information['sortAuxFirst'], function (indexFirst, valueFirst) {
-                            information['firsts'][indexFirst] = valueFirst[0];
-                        });
-                        information['firsts'].push($(this).text().trim());
-
-                        if(information['firsts'].length > frames) {
-                            information['spliceAux'] = -1;
-                            $.each(information['sortAuxFirst'], function (indexFirst, valueFirst) {
-                                if(indexFirst === 0 || valueFirst[1] === -1){
-                                    information['spliceAux'] = indexFirst;
+                                if(nextUse > information['victimNextUse']) {
+                                    information['victim'] = indexFirst;
+                                    information['victimNextUse'] = nextUse;
                                 }
                             });
 
                             information['orders'][information['orders'].indexOf(information['firsts']
-								.splice(information['spliceAux'], 1)[0])] = information['orders'].pop();
+								.splice(information['victim'], 1)[0])] = information['orders'].pop();
                         }
+                        information['firsts'].push($(this).text().trim());
 
                         information['repeat'] = false;
                     } else {
@@ -307,7 +284,7 @@ function runAlgorithm(table) {
 
                     if(information['lasts'].length > frames) {
                         information['aux'] = information['lasts'].splice(1, 1)[0];
-                        information['orders'][information['orders'].indexOf(information['aux'])] = information['lasts'][0];
+                        information['orders'][information['orders'].indexOf(information['aux'])] = information['orders'].pop();
                     }
 
                     if(!bolWhiteRepeat || !information['repeat']) {
@@ -331,11 +308,3 @@ function runAlgorithm(table) {
 
     return null;
 }
-
-/**
- * Trigger CTRL+O
- * Trigger for special commands in case it is necessary to create hidden algorithms on screen or secret options.
- */
-$(document).hotKey({ key: 'o', modifier: 'ctrl' }, function () {
-    $('.hide_element').fnToggle();
-});
